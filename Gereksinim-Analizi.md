@@ -1,36 +1,22 @@
-# Gereksinim Analizi
-
-Tüm gereksinimlerinizi çıkardıktan sonra beraber tartışıyoruz ve son gereksinimlerin isimlerini hangi API metoduna karşılık geleceğini ve kısa açıklamalarını buraya numaralı bir şekilde yazıyorsunuz. Daha sonra aşağıya herkes kendi gereksinimiyle ilgili sayfayı oluşturmalı ve kendi sayfasında kendine ait gereksinimleri numaralı bir şekilde listeleyerek her bir gereksinimin açıklamalarını yazmalı. Toplamda grup üyesi sayısı kadar sayfa oluşturulmalı. Her grup üyesine eşit sayıda gereksinim atanmalı.
-
-## Gereksinim Sayıları (En Az)
-
-- **1 Kişi:** 10 gereksinim
-- **2 Kişi:** 16 gereksinim
-- **3 Kişi:** 21 gereksinim
-- **4 Kişi:** 24 gereksinim
-- **5 Kişi:** 30 gereksinim
-
-## Gereksinimlerde Uyulması Gereken Kurallar
-
-1. **İsimler anlamlı olmalı:** Gereksinim isimleri net ve anlaşılır olmalıdır.
-2. **Açıklamalar net olmalı:** Her gereksinimin açıklaması açık ve anlaşılır şekilde yazılmalıdır.
-3. **Açıklamalar teknik jargon ve kısaltmalar içermemeli:** Gereksinim açıklamaları herkesin anlayabileceği basit bir dille yazılmalıdır.
-4. **Gereksinim isimleri çok uzun olmamalı ve bir eylem bildirmeli:** 
-   - İsimler kısa ve öz olmalıdır
-   - Bir eylem fiili içermelidir
-   - Örnekler: "Kayıt Olma", "Giriş Yapma", "Profil Güncelleme", "Hesap Silme"
 
 # Tüm Gereksinimler 
 
-1. **Giriş Yapma** (Ali Tutar)
-2. **Üye Olma** (Ali Tutar)
-3. ..
-4. ..
+1.  **Sisteme Kayıt Olma** (Berkay Diler)
+2.  **Kullanıcı Girişi Yapma** (Berkay Diler)
+3.  **Kullanıcı Hesabını Silme** (Berkay Diler)
+4.  **Ülke İsmiyle Arama Yapma** (Berkay Diler)
+5.  **Dünya Haritası Üzerinde Görselleştirme** (Berkay Diler)
+6.  **Ülke Karşılaştırması Yapma** (Berkay Diler)
+7.  **Vize Türüne Göre Filtreleme** (Berkay Diler)
+8.  **Favori Ülkeleri Listeye Ekleme** (Berkay Diler)
+9.  **Kayıtlı Ülke Notunu Güncelleme** (Berkay Diler)
+10. **Favori Listesinden Ülke Çıkarma** (Berkay Diler)
+11. **Vize Ücreti ve Döviz Hesaplama** (Berkay Diler)
+12. **Kullanıcı İstatistiklerini Görüntüleme** (Berkay Diler)
+13. **Ülke Detay ve Görsel Bilgilerini Gösterme** (Berkay Diler)
+14. **Vize Başvuru Merkezi Konumlarını Listeleme** (Berkay Diler)
+15. **Kullanıcı Profil Bilgilerini Güncelleme** (Berkay Diler)
+
 # Gereksinim Dağılımları
 
-1. [Ali Tutar'ın Gereksinimleri](Ali-Tutar/Ali-Tutar-Gereksinimler.md)
-2. [Grup Üyesi 2'nin Gereksinimleri](Grup-Uyesi-2/Grup-Uyesi-2-Gereksinimler.md)
-3. [Grup Üyesi 3'ün Gereksinimleri](Grup-Uyesi-3/Grup-Uyesi-3-Gereksinimler.md)
-4. [Grup Üyesi 4'ün Gereksinimleri](Grup-Uyesi-4/Grup-Uyesi-4-Gereksinimler.md)
-5. [Grup Üyesi 5'in Gereksinimleri](Grup-Uyesi-5/Grup-Uyesi-5-Gereksinimler.md)
-6. [Grup Üyesi 6'nın Gereksinimleri](Grup-Uyesi-6/Grup-Uyesi-6-Gereksinimler.md)
+1. [Berkay Diler'in Gereksinimleri](Berkay-Diler/Berkay-Diler-Gereksinimler.md)

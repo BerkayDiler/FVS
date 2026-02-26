@@ -35,8 +35,8 @@
    **Açıklama:** Kullanıcı, favori listesinde kayıtlı olan bir ülke için daha önce yazdığı hatırlatıcı notları değiştirir.
 
 10) **Favori Listesinden Ülke Çıkarma** 
-   **API Metodu:** DELETE /api/favorites/{id}
-   **Açıklama:** Kullanıcı, artık ilgilenmediği bir ülkeyi kişisel favori listesinden tamamen siler.
+    **API Metodu:** DELETE /api/favorites/{id}
+    **Açıklama:** Kullanıcı, artık ilgilenmediği bir ülkeyi kişisel favori listesinden tamamen siler.
 
 11) **Vize Ücreti ve Döviz Hesaplama** 
     **API Metodu:** GET /api/services/exchange-rates?country={id}
