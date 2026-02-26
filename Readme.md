@@ -29,7 +29,7 @@
 ## Proje Ekibi
 
 **Grup Adı:** 
-> FVS
+> FVS (Fast-Visa-Search)
 
 **Ekip Üyeleri:** 
 - Berkay Diler
