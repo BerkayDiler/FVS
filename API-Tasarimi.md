@@ -5,7 +5,7 @@
 Bu doküman, OpenAPI Specification (OAS) 3.0 standardına göre hazırlanmış FVS projesi için olan API tasarımını içermektedir.
 
 ## OpenAPI Specification
-
+```yaml
 openapi: 3.0.3
 info:
   title: Fast Visa Search (FVS) Api Dokümantasyonu
@@ -876,4 +876,5 @@ paths:
                   type: integer
                   description: Favorilere eklenme sayısı
         '500':
-          $ref: '#/components/responses/ServerError'          
+          $ref: '#/components/responses/ServerError'    
+```                
