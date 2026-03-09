@@ -1,0 +1,879 @@
+# FVS API Tasarımı
+
+**OpenAPI Spesifikasyon Dosyası:** [FVS-OpenAPI](FVS-OpenAPI.yaml)
+
+Bu doküman, OpenAPI Specification (OAS) 3.0 standardına göre hazırlanmış FVS projesi için olan API tasarımını içermektedir.
+
+## OpenAPI Specification
+
+openapi: 3.0.3
+info:
+  title: Fast Visa Search (FVS) Api Dokümantasyonu
+  version: 1.0.0
+  description: Vize ve seyahat planlama API dokümantasyonu.
+  contact:
+    name: Berkay Diler
+    email: berkaydiler4002@gmail.com
+
+
+servers:
+  - url: http://localhost:5000
+    description: Yerel Geliştirme Ortamı
+
+
+tags:
+  - name: auth
+    description: Kayıt ve giriş işlemleri
+  - name: users
+    description: Kullanıcı profili işlemleri
+  - name: countries
+    description: Ülke vize bilgileri ve harita
+  - name: favorites
+    description: Kişisel seyahat rotaları
+  - name: services
+    description: Döviz ve vize merkezleri
+  - name: stats
+    description: Sistem istatistikleri
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
+  parameters:
+    IdParameter:
+      name: id
+      in: path
+      required: true
+      description: Kaynağın benzersiz ID'si
+      schema:
+        type: string
+
+
+  responses: 
+    BadRequestError:
+      description: Geçersiz istek
+      content:
+        application/json:
+          schema: 
+           { $ref: '#/components/schemas/Error' }
+          example:
+             code: "INVALID_INPUT"
+             message: "Girdi verileri geçersiz. Lütfen kontrol edin ve tekrar deneyin."
+
+
+    UnauthorizedError:
+      description: Yetkilendirme hatası
+      content:
+        application/json:
+          schema: 
+           { $ref: '#/components/schemas/Error' }
+          example:
+             code: "UNAUTHORIZED"
+             message: "Bu işlemi gerçekleştirmek için giriş yapmalısınız."
+          
+
+    NotFoundError:
+      description: Kaynak bulunamadı
+      content:
+        application/json:
+          schema: 
+           { $ref: '#/components/schemas/Error' }
+          example:
+             code: "USER_NOT_FOUND"
+             message: "Bu e-posta adresi ile kayıtlı bir kullanıcı bulunamadı."
+
+
+    ConflictError:
+      description: Çakışan veri
+      content:
+        application/json:
+          schema: 
+           { $ref: '#/components/schemas/Error' } 
+          example:
+             code: "USER_ALREADY_EXISTS"
+             message: "Bu e-posta adresi ile zaten kayıtlı bir kullanıcı bulunuyor."      
+
+
+    ValidationError:
+      description: Geçersiz giriş verisi
+      content:
+        application/json:
+          schema:
+           { $ref: '#/components/schemas/Error' }
+          example:
+             code: "VALIDATION_ERROR"
+             message: "Girdi verileri doğrulanamadı. Lütfen tüm alanları kontrol edin ve tekrar deneyin."
+
+
+    ServerError:
+      description: Sunucu hatası
+      content:
+        application/json:
+          schema: 
+           { $ref: '#/components/schemas/Error' }
+          example:
+             code: "INTERNAL_SERVER_ERROR"
+             message: "Sunucuda beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin."         
+
+
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        name:
+          type: string
+
+        email:
+          type: string
+          format: email
+
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+
+
+    LoginCredentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+
+        rememberMe:
+          type: boolean
+          description: "Oturumu açık tutma seçeneği"
+          default: false
+
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+
+        email:
+          type: string
+          format: email
+
+        passportType:
+          type: string
+          enum: [bordo, yesil, gri, siyah]
+          description: Vize sorgulama doğruluğu için pasaport türü
+
+        phoneNumber:
+          type: string
+          pattern: '^(\+90|0)?[0-9]{10}$'
+          description: İletişim bilgisi
+
+        birthDate:
+          type: string
+          format: date
+          description: Başvuru formu otomasyonu için doğum tarihi
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Sistemin otomatik oluşturduğu benzersiz kimlik
+
+        name:
+          type: string
+          description: Kullanıcının adı ve soyadı
+
+        email:
+          type: string
+          format: email
+
+        passportType:
+          type: string
+          description: Kullanıcının pasaport türü (bordo,gri,yeşil,siyah)
+
+        favorites:
+          type: array
+          items:
+            type: string
+          description: Favori ülke ID'leri listesi
+
+        role:
+          type: string
+          enum: [user, admin]
+          default: user
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Kayıt tarihi
+
+
+    Favorite:
+      type: object
+      required:
+        - userId
+        - countryId
+      properties:
+        id:
+          type: string
+          format: uuid
+
+        userId:
+          type: string
+          description: Favoriyi ekleyen kullanıcının ID'si
+
+        countryId:
+          type: string
+          description: Favoriye eklenen ülkenin ID'si
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Favoriye eklenme tarihi
+
+
+    AuthResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: JWT token
+        user:
+          $ref: '#/components/schemas/User'
+
+
+    Country:
+      type: object
+      required:
+        - name
+        - visaRequired
+        - visaType
+      properties:
+        id:
+          type: string
+          format: uuid
+
+        name:
+          type: string
+          description: Ülke ismi
+          example: "Almanya"
+
+        visaRequired:
+          type: boolean
+          description: Vize gerekli mi?
+
+        visaType:
+          type: string
+          enum: [Schengen, E-Vize, Kapıda Vize, Vizesiz]
+          description: Vize türü
+
+        visaCost:
+          type: number
+          description: Tahmini vize ücreti (EUR cinsinden)
+
+        location: # Harita koordinatları için önemli
+          type: object
+          properties:
+            lat: { type: number }
+            lng: { type: number }
+
+        flagUrl:
+          type: string
+          description: Bayrak görseli linki
+
+        passportImageUrl:
+          type: string
+          description: Pasaport görseli linki
+    VisaCenters:
+      type: object
+      required:
+        - name
+        - country
+        - location
+        - id
+      properties:
+        name:
+          type: string
+          description: Vize başvuru merkezi adı.
+
+        country:
+          type: string
+          description: Merkezin bulunduğu ülke.
+
+        location:
+           type: object
+           required:
+             - address
+             - coordinates
+           description: Merkezin bulunduğu konum bilgisi.
+
+           properties:
+            address:
+              type: string
+              description: Merkezin tam adresi.
+
+            coordinates:
+              $ref: '#/components/schemas/Coordinates'
+
+        contact:
+         type: object
+         properties:
+          phone:
+            type: string
+            description: Merkezin telefon numarası.
+
+          email:
+            type: string
+            description: Merkezin e-posta adresi.
+
+          website:
+            type: string
+            description: Merkezin resmi web sitesi URL'si.
+        workingHours:
+          type: string
+          description: Merkezin çalışma saatleri bilgisi.(Hafta içi 09.00-17.00 gibi)
+
+    Coordinates:
+      type: object
+      required:
+        - lat
+        - lng
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Enlem koordinatı
+
+        lng:
+          type: number
+          format: float
+          description: Boylam koordinatı                      
+
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Hata kodu
+        message:
+          type: string
+          description: Hata mesajı
+          example: "Kullanıcı bulunamadı."
+    
+
+    Success:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: Başarı kodu
+          example: "SUCCESS"
+
+        message:
+          type: string
+          description: Başarı mesajı   
+          example: "İşlem başarılı."         
+
+
+paths:
+  # --- AUTH ---
+  /auth/register:
+    post:
+      tags:
+        - auth
+      security: []
+      summary:  Sisteme Kayıt Olma
+      operationId: registerUser
+      description: Yeni kullanıcı kaydı oluşturur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+
+      responses:
+        '201':
+          description: Kullanıcı kaydı başarıyla yapıldı.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+            $ref: '#/components/responses/BadRequestError'
+        '409':
+            $ref: '#/components/responses/ConflictError'
+
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      security: []  
+      summary:  Kullanıcı Girişi Yapma
+      description: Mevcut kullanıcı bilgileriyle giriş yapar ve JWT token döndürür. 
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginCredentials'
+      responses:
+        '200':
+          description: Giriş başarılı
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+                '400':
+                  $ref: '#/components/responses/BadRequestError'
+                  '401':
+                    $ref: '#/components/responses/UnauthorizedError'
+
+
+  # --- USERS ---
+  /users/profile:
+    put:
+      tags:
+        - users
+      summary:  Kullanıcı Profil Bilgilerini Güncelleme
+      description: Kullanıcı, ad, e-posta, pasaport türü gibi profil bilgilerini güncelleyebilir.
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Profil güncellendi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+                '400':
+                  $ref: '#/components/responses/BadRequestError'
+                  '401':
+                    $ref: '#/components/responses/UnauthorizedError'
+
+                 
+    delete:
+      tags:
+        - users
+      summary:  Kullanıcı Hesabını Silme
+      description: Kullanıcı, hesabını kalıcı olarak silebilir. Bu işlem geri alınamaz.
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Hesap silindi.
+          
+
+  # --- COUNTRIES ---
+  /countries/search:
+    get:
+      tags:
+        - countries
+      security: []
+      summary:  Ülke İsmiyle Arama Yapma
+      description:  Kullanıcı, ülke ismiyle vize bilgilerini arayabilir. 
+                    Arama sonuçları, ülke adı, vize türü, vize ücreti gibi temel bilgileri içerir.
+      operationId: searchCountry
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ülke bilgisi döndürülür
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: '#/components/schemas/Country'
+                400:
+                  $ref: '#/components/responses/BadRequestError'
+                  404:
+                    description: Aranan ülke bulunamadı
+                    content:
+                      application/json:
+                        schema:
+                          $ref: '#/components/schemas/Error'
+                        
+
+  /countries/map-data:
+    get:
+      tags:
+        - countries
+      security: []
+      summary:  Dünya Haritası Üzerinde Görselleştirme
+      description: Tüm ülkelerin vize bilgilerini içeren harita verisi sağlar. 
+                    Her ülke için vize türü, ücreti ve konum bilgisi gibi detaylar içerir. 
+                    Bu veri, kullanıcıların dünya haritası üzerinde vize durumlarını görselleştirmesine olanak tanır.
+      operationId: getMapData
+      responses:
+        '200':
+          description: Harita verisi başarıyla döndürüldü.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/Country'
+                 '500':
+                  description: Sunucu tarafında beklenmeyen bir hata oluştu.
+                               Lütfen daha sonra tekrar deneyin.
+                  $ref: '#/components/responses/ServerError'
+
+
+  /countries/compare:
+    get:
+      tags:
+        - countries
+      security: []
+      summary:  Ülke Karşılaştırması Yapma
+      description: İki ülkenin vize gereksinimlerini, türlerini ve ücretlerini karşılaştırır.                    
+      operationId: compareCountries
+      parameters:
+        - name: c1
+          in: query
+          description: Karşılaştırılacak ilk ülke ismi
+          required: true
+          schema:
+            type: string
+        - name: c2
+          in: query
+          description: Karşılaştırılacak ikinci ülke ismi
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Karşılaştırma sonucu
+          content:
+           application/json:
+            schema:
+             type: object
+             properties:
+              country1:
+                $ref: '#/components/schemas/Country'
+              country2:
+                $ref: '#/components/schemas/Country'
+        '404':
+          description: Ülkelerden biri veya ikisi bulunamadı  
+          $ref: '#/components/responses/NotFoundError' 
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+
+  /countries/filter:
+    get:
+      tags:
+        - countries
+      security: []
+      summary:  Vize Türüne Göre Filtreleme
+      description: Kullanıcı, vize türüne göre ülkeleri filtreleyebilir. 
+      operationId: filterCountries
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [Schengen, E-Vize, Kapıda Vize, Vizesiz]
+      responses:
+        '200':
+          description: Filtrelenmiş liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/Country'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+          
+
+  /countries/{id}/details:
+    get:
+      tags:
+        - countries
+      security: []
+      summary:  Ülke Detay ve Görsel Bilgilerini Gösterme
+      description: Belirli bir ülkenin vize detaylarını, harita konumunu ve görsel bilgilerini sağlar. 
+      operationId: getCountryDetails
+      parameters:
+        - $ref: '#/components/parameters/IdParameter'
+      responses:
+        '200':
+          description: Detaylı bilgiler getirildi.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+        '404':
+          description: Belirtilen ID'ye sahip ülke bulunamadı
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+
+  # --- FAVORITES ---
+  /favorites:
+    post:
+      tags: 
+       - favorites     
+      summary:  Favori Ülkeleri Listeye Eklemed
+      description: Kullanıcı, favori listesine yeni bir ülke ekleyebilir. 
+      operationId: addFavorite
+      security:
+        - bearerAuth: []
+      requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - countryId
+                properties:
+                  countryId:
+                    type: string
+                    description: Eklenmek istenen ülkenin ID'si
+      responses:
+        '201':
+          description: Ülke favorilere eklendi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Favorite'
+        '401':
+          description: Yetkisiz erişim. Giriş yapılmalı. 
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Ülke zaten favorilerinizde mevcut
+          content:
+            application/json:
+              schema: 
+               $ref: '#/components/schemas/Error' 
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+          
+  /favorites/{id}/note:
+    put:
+      tags:
+        - favorites
+      summary:  Kayıtlı Ülke Notunu Güncelleme
+      operationId: updateFavoriteNote
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParameter'
+      requestBody:
+            required: true
+            description: Favori ülkeye eklenmek istenen not bilgisi
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - note
+                  properties:
+                    note:
+                      type: string
+                      description: Güncellenecek not bilgisi
+      responses:
+        '200':
+          description: Not güncellendi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                 message:
+                  type: string
+                  description: Güncelleme sonucu mesajı
+
+                 newNote:
+                   type: string
+                   description: Güncellenmiş not bilgisi
+        '401':
+               $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Favori kaydı bulunamadı
+          content:
+            application/json:
+              schema:                 
+               $ref: '#/components/responses/NotFoundError'
+
+
+  /favorites/{id}:
+    delete:
+      tags:
+        - favorites
+      summary:  Favori Listesinden Ülke Çıkarma
+      operationId: removeFavorite
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParameter'
+      responses:
+        '204':
+          description: Favori kaydı başarıyla silindi.
+        '401':
+         $ref: '#/components/responses/UnauthorizedError'
+        '404':
+         description: Favori kaydı bulunamadı.
+         content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/NotFoundError'
+        '500':
+         $ref: '#/components/responses/ServerError'        
+                   
+
+  # --- SERVICES & STATS ---
+
+  /services/exchange-rates:
+    get:
+      tags:
+        - services
+      security: []
+      summary:  Vize Ücreti ve Döviz Hesaplama
+      description: Kullanıcı, belirli bir ülkenin vize ücretini ve güncel döviz kurlarını sorgulayabilir.              
+      operationId: getExchangeRates
+      parameters:
+        - name: country
+          in: query
+          required: true
+          description: Vize ücreti ve döviz kurlarını öğrenmek istenilen ülke ismi.
+          schema:
+            type: string
+        - name: currency
+          in: query
+          required: true
+          description: Döviz kurlarını belirli bir para birimine göre almak için (örneğin, USD, EUR). Belirtilmezse varsayılan olarak EUR cinsinden döner.
+          schema:
+            type: string    
+      responses:
+        '200':
+          description: Ücret verisi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  country:
+                    type: string
+                    description: Ülke ismi
+
+                  visaCost:
+                    type: number
+                    format: float
+                    description: Vize ücreti (EUR cinsinden)
+
+                  exchangeRates:
+                    type: number
+                    format: float
+                    description: Güncel döviz kurları
+
+                  currency:
+                   type: string
+                   description: Döviz cinsi (örneğin, USD, EUR)
+                    
+
+  /services/visa-centers:
+    get:
+      tags:
+        - services
+      security: []
+      summary:  Vize Başvuru Merkezi Konumlarını Listeleme
+      operationId: getVisaCenters
+      parameters:
+        - name: country
+          in: query
+          required: true
+          description: Merkezlerin listeleneceği ülke.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Merkez listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VisaCenters'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/ServerError'        
+
+
+  /stats/popular:
+    get:
+      tags:
+        - stats
+      security: []
+      summary:  En Çok İlgilenilen Ülkelerin istatistiklerini Alma
+      description: Popüler ülkelerin istatistikleri
+      operationId: getPopularStats
+      responses:
+        '200':
+          description: Popüler ülkelerin istatistikleri başarıyla döndürüldü.
+          content:
+           application/json:
+            schema:
+             type: array
+             items:
+              type: object
+              properties:
+                country:
+                  type: string
+                  description: Ülke ismi
+
+                searchCount:
+                  type: integer
+                  description: Arama sayısı
+
+                favoriteCount:
+                  type: integer
+                  description: Favorilere eklenme sayısı
+        '500':
+          $ref: '#/components/responses/ServerError'          
